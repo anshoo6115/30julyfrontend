@@ -34,4 +34,4 @@ jobs:
           command: |
               ls -lrt ~/project/
               aws s3 --profile eb-cli sync ~/project/ s3://cloudfrontorigin99/
-              aws cloudfront create-invalidation --distribution-id E36ZTPNQEF06F1 --paths /\* --profile eb-cli
+              aws cloudfront create-invalidation --distribution-id E1S22E2CSE6OM8 --paths /\* --profile eb-cli
