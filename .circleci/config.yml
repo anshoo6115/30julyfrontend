@@ -1,0 +1,37 @@
+##Circle CI version 2 configuration birchbox Domain.
+version: 2
+jobs:
+  build:
+    #Working directory of the project
+    working_directory: ~/project
+    docker:
+    - image: circleci/node:8.0.0
+    steps:
+    #Checkout the current branch
+      - checkout
+      - run:
+          name: Install required packages.
+          command: |
+              sudo apt-get install -y python-pip libyaml-dev python-dev
+              sudo pip install awscli
+              #Print current branch.
+              echo ${CIRCLE_BRANCH}
+      - run:
+          name: Create AWS credentials manually
+          command: |
+                mkdir ~/.aws
+                touch ~/.aws/config
+                chmod 600 ~/.aws/config
+                echo "[profile eb-cli]" > ~/.aws/config
+                echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
+                echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config        
+      - run:
+          name: Backup to S3
+          command: |
+              aws s3 cp --profile eb-cli --recursive s3://cloudfrontorigin99/ s3://calebtest1/`date +%d-%m-%Y-%H-%M`/ --exclude 'node_modules/*'
+      - run:
+          name: Bucket Sync
+          command: |
+              ls -lrt ~/project/
+              aws s3 --profile eb-cli sync ~/project/ s3://cloudfrontorigin99/
+              aws cloudfront create-invalidation --distribution-id E36ZTPNQEF06F1 --paths /\* --profile eb-cli
